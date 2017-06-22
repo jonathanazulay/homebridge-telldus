@@ -132,7 +132,6 @@ module.exports = function(homebridge) {
 					this.log("Logged in with user: " + user);
 					return this.getAccessories();
 				})
-				.then(this.log)
 				.then(accessories => {
 					callback(accessories);
 				})
