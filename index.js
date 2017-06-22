@@ -63,6 +63,7 @@ module.exports = function(homebridge) {
 
 	function TelldusPlatform(log, config) {
 		this.log = log;
+		log('hello')
 
 		if (config.url) {
 			this.log('Using local REST API at', config.url)
