@@ -24,10 +24,10 @@ function login (session, appname, log) {
         () => session.resumeLogin(initLogin.token)
       )
     })
-    .then((resp) => { console.log('le ye', resp); return resp; })
     .then(({ token }) => ({
       token
     }))
+    .then((resp) => { console.log('le ye', resp); return resp; })
 }
 
 module.exports = login
