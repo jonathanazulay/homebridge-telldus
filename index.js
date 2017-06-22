@@ -1,6 +1,7 @@
 'use strict';
 
 const TellduAPI = require('telldus-live');
+const TelldusLocal = require('telldus-local');
 const bluebird = require('bluebird');
 const debug = require('debug')('homebridge-telldus');
 
@@ -63,15 +64,47 @@ module.exports = function(homebridge) {
 	function TelldusPlatform(log, config) {
 		this.log = log;
 
-		// The config
-		const publicKey = config["public_key"];
-		const privateKey = config["private_key"];
-		this.token = config["token"];
-		this.tokenSecret = config["token_secret"];
-		this.unknownAccessories = config["unknown_accessories"] || [];
+		if (config.url) {
+			this.log('Using local REST API at', config.url)
 
-		TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
-		bluebird.promisifyAll(TelldusLive);
+			let session = new TelldusLocal.Session(config.url)
+
+			let login = function () {
+				return session
+					.initLogin('telldus-local-test')
+					.then(resp => {
+						this.log(`Visit ${resp.authUrl} within 60 seconds and authorize the app. 1 year renewable token is recommended`);
+						return resp.token
+					})
+					.then((token) =>
+						util.retryPromise(60, 1000)(() => session.resumeLogin(token))
+					)
+					.then(resp => {
+						this.log(`Your access token is: \n\n${resp.token}\n\nSave to config to avoid this step next time`);
+						return resp
+					})
+			}
+
+
+
+			async function login () {
+
+			}
+
+
+
+
+			TelldusLive = Object.assign(TelldusLocal.api(session), { login })
+		} else {
+			this.log('Using TelldusLive')
+			const publicKey = config["public_key"];
+			const privateKey = config["private_key"];
+			this.loginCredentials = [config.token, config.token_secret]
+			this.unknownAccessories = config["unknown_accessories"] || [];
+
+			TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
+			bluebird.promisifyAll(TelldusLive);
+		}
 	}
 
 	function TelldusDevice(log, device, deviceConfig) {
@@ -112,7 +145,7 @@ module.exports = function(homebridge) {
 		accessories: function(callback) {
 			this.log("Loading accessories...");
 
-			TelldusLive.loginAsync(this.token, this.tokenSecret)
+			TelldusLive.loginAsync.apply(TelldusLive, this.loginCredentials)
 				.then(user => {
 					this.log("Logged in with user: " + user.email);
 					return this.getAccessories();
