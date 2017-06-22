@@ -24,7 +24,7 @@ function login (session, appname, log) {
         () => session.resumeLogin(initLogin.token)
       )
     })
-    .then(() => console.log('le ye'))
+    .then((resp) => { console.log('le ye', resp); return resp; })
     .then(({ token }) => ({
       token
     }))
