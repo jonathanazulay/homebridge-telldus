@@ -71,7 +71,7 @@ module.exports = function(homebridge) {
 			TelldusLive = TelldusLocal.api(session);
 			Object.getOwnPropertyNames(TelldusLive).forEach(name => {
 				TelldusLive[name + 'Async'] = TelldusLive[name]
-				delete TelldusLive[name]
+				TelldusLive[name] = util.promiseToCallback(TelldusLive[name])
 			});
 			TelldusLive.loginAsync = interactiveLogin;
 			this.loginCredentials = [];

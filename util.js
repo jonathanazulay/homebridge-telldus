@@ -29,3 +29,13 @@ module.exports.retryPromise = (times, interval) => func => {
     }
   })
 };
+
+module.exports.promiseToCallback = function (promise) {
+	return function (cb) {
+		promise.then(function (data) {
+			setImmediate(cb, null, data);
+		}, function (err) {
+			setImmediate(cb, err);
+		});
+	};
+};
