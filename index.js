@@ -71,7 +71,6 @@ module.exports = function(homebridge) {
 			TelldusLive = TelldusLocal.api(session);
 			Object.getOwnPropertyNames(TelldusLive).forEach(name => {
 				TelldusLive[name + 'Async'] = TelldusLive[name]
-				TelldusLive[name] = util.promiseToCallback(TelldusLive[name])
 			});
 			TelldusLive.loginAsync = interactiveLogin;
 			this.loginCredentials = [];
@@ -236,15 +235,19 @@ module.exports = function(homebridge) {
 					};
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
-							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
-							callback(false, cx.getValueFromDev(cdevice));
-						});
+						TelldusLive.getDeviceInfoAsync(this.device)
+							.then(cdevice => {
+								this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
+								callback(false, cx.getValueFromDev(cdevice));
+							})
+							.catch(err => {
+								callback(err);
+							})
 					});
 
 					cx.on('set', (state, callback) => {
-						TelldusLive.dimDevice(this.device, state, (err) => {
+						TelldusLive.dimDeviceAsync(this.device, state)
+						.catch((err) => {
 							callback(err);
 						});
 					});
@@ -258,17 +261,21 @@ module.exports = function(homebridge) {
 					};
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
+						TelldusLive.getDeviceInfoAsync(this.device)
+						.then((cdevice) => {
 							this.log("Getting current state for security " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 3 ? "disarmed" : "armed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
-						});
+						})
+						.catch((err) => {
+							callback(err)
+						})
 					});
 
 					cx.on('set', (state, callback) => {
-						TelldusLive.dimDevice(this.device, state, (err) => {
+						TelldusLive.dimDevice(this.device, state)
+						.catch((err) => {
 							callback(err);
-						});
+						})
 					});
 				}
 
@@ -276,10 +283,13 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => dev.state == 1 ? 1 : 0;
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
+						TelldusLive.getDeviceInfoAsync(this.device)
+						.then((cdevice) => {
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) == 1 ? "open" : "closed") + "]");
 							callback(false, cx.getValueFromDev(cdevice));
+						})
+						.catch((err) => {
+							callback(err);
 						});
 					});
 				}
@@ -288,11 +298,14 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[0].value);
 
 					cx.on('get', (callback) => {
-						TelldusLive.getSensorInfo(this.device, (err, device) => {
-							if (err) return callback(err);
+						TelldusLive.getSensorInfoAsync(this.device)
+						.then((device) => {
 							this.log("Getting temp for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 							callback(false, cx.getValueFromDev(device));
-						});
+						})
+						.catch((err) => {
+							callback(err);
+						})
 					});
 
 					cx.setProps({
@@ -305,10 +318,13 @@ module.exports = function(homebridge) {
 					cx.getValueFromDev = dev => parseFloat(dev.data[1].value);
 
 					cx.on('get', (callback) => {
-						TelldusLive.getSensorInfo(this.device, (err, device) => {
-							if (err) return callback(err);
+						TelldusLive.getSensorInfoAsync(this.device)
+						.then((device) => {
 							this.log("Getting humidity for sensor " + device.name + " [" + cx.getValueFromDev(device) + "]");
 							callback(false, cx.getValueFromDev(device));
+						})
+						.catch((err) => {
+							callback(err);
 						});
 					});
 
@@ -324,8 +340,8 @@ module.exports = function(homebridge) {
 					cx.value = cx.getValueFromDev(this.device);
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
+						TelldusLive.getDeviceInfoAsync(this.device)
+						.then((cdevice) => {
 							this.log("Getting state for switch " + cdevice.name + " [" + (cx.getValueFromDev(cdevice) ? "on" : "off") + "]");
 
 							switch (cx.props.format) {
@@ -336,21 +352,25 @@ module.exports = function(homebridge) {
 								callback(false, cx.getValueFromDev(cdevice));
 								break;
 							}
+						})
+						.catch((err) => {
+							callback(err);
 						});
 					});
 
 					cx.on('set', (powerOn, callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
-
+						TelldusLive.getDeviceInfoAsync(this.device)
+						.then((cdevice) => {
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
 
-							TelldusLive.onOffDevice(this.device, powerOn, (err) => {
-								callback(err);
-							});
+							TelldusLive.onOffDeviceAsync(this.device, powerOn)
+							.catch((err) => callback(err))
+						})
+						.catch((err) => {
+							callback(err);
 						});
 					});
 				}
@@ -365,11 +385,12 @@ module.exports = function(homebridge) {
 					cx.value = cx.getValueFromDev(this.device);
 
 					cx.on('get', (callback) => {
-						TelldusLive.getDeviceInfo(this.device, (err, cdevice) => {
-							if (err) return callback(err);
+						TelldusLive.getDeviceInfoAsync(this.device)
+						.then((cdevice) => {
 							this.log("Getting value for dimmer " + cdevice.name + " [" + cx.getValueFromDev(cdevice) + "]");
 							callback(false, cx.getValueFromDev(cdevice));
-						});
+						})
+						.catch((err) => callback(err));
 					});
 
 					cx.on('set', (level, callback) => {
