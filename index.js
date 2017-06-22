@@ -63,23 +63,28 @@ module.exports = function(homebridge) {
 
 	function TelldusPlatform(log, config) {
 		this.log = log;
-		log('hello')
 
 		if (config.url) {
-			this.log('Using local REST API at', config.url)
-			let session = new TelldusLocal.Session(config.url)
+			this.log('Using local REST API at', config.url);
+			let session = new TelldusLocal.Session(config.url);
 			let interactiveLogin = () => login(session, 'homebridge-telldus', this.log);
-			TelldusLive = Object.assign(TelldusLocal.api(session), { login: interactiveLogin })
-			this.loginCredentials = []
+			TelldusLive = TelldusLocal.api(session);
+			Object.keys(TelldusLive).forEach(name => {
+				TelldusLive[name + 'Async'] = TelldusLive[name]
+				delete TelldusLive[name]
+			});
+			TelldusLive.loginAsync = interactiveLogin;
+			this.loginCredentials = [];
 		} else {
 			this.log('Using TelldusLive')
 			const publicKey = config["public_key"];
 			const privateKey = config["private_key"];
 			this.loginCredentials = [config.token, config.token_secret]
 			TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
+			bluebird.promisifyAll(TelldusLive);
 		}
 
-		bluebird.promisifyAll(TelldusLive);
+
 		log(TelldusLive);
 		this.unknownAccessories = config["unknown_accessories"] || [];
 	}
