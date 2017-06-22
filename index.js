@@ -247,6 +247,7 @@ module.exports = function(homebridge) {
 
 					cx.on('set', (state, callback) => {
 						TelldusLive.dimDeviceAsync(this.device, state)
+						.then(() => callback())
 						.catch((err) => {
 							callback(err);
 						});
@@ -273,6 +274,7 @@ module.exports = function(homebridge) {
 
 					cx.on('set', (state, callback) => {
 						TelldusLive.dimDevice(this.device, state)
+						.then(() => callback())
 						.catch((err) => {
 							callback(err);
 						})
@@ -365,12 +367,9 @@ module.exports = function(homebridge) {
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
-							this.log('powerOn', powerOn);
-							TelldusLive.turnOffDevice(this.device)
-							.catch((err) => {
-								this.log('error', err);
-								callback(err);
-							})
+							TelldusLive.onOffDevice(this.device, powerOn)
+							.then(() => callback())
+							.catch((err) => callback(err))
 						})
 						.catch((err) => {
 							callback(err);
