@@ -130,7 +130,7 @@ module.exports = function(homebridge) {
 			TelldusLive.loginAsync.apply(TelldusLive, this.loginCredentials)
 				.then(user => {
 					this.log("Logged in with user: " + user);
-					return this.getAccessories();
+					return this.getAccessories().map(a => a.device);
 				})
 				.then(accessories => {
 					this.log('done get accessories', accessories);
@@ -197,6 +197,8 @@ module.exports = function(homebridge) {
 		getServices: function() {
 			// Accessory information
 			const accessoryInformation = new Service.AccessoryInformation();
+
+			this.log(this)
 
 			accessoryInformation
 				.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
