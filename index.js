@@ -368,9 +368,16 @@ module.exports = function(homebridge) {
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback(false);
 							console.log(this.device, powerOn)
-							TelldusLive.onOffDeviceAsync(this.device, powerOn)
-							.then(() => { console.log('onoffsuccess'); callback(false); })
-							.catch((err) => { console.log('onofffail'); callback(err); })
+
+							if (powerOn) {
+								TelldusLive.turnOnDevice(this.device)
+								.then(() => { console.log('onoffsuccess'); callback(false); })
+								.catch((err) => { console.log('onofffail'); callback(err); })
+							} else {
+								TelldusLive.onOffDeviceAsync(this.device)
+								.then(() => { console.log('onoffsuccess'); callback(false); })
+								.catch((err) => { console.log('onofffail'); callback(err); })
+							}
 						})
 						.catch((err) => {
 							callback(err);
