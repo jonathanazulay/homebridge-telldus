@@ -160,7 +160,7 @@ module.exports = function(homebridge) {
 			return TelldusLive.getSensorsAsync()
         .then(sensors => {
 					debug('getSensors response', sensors);
-					this.log('lesensor' + sensors);
+					this.log('lesensor' + JSON.stringify(sensors));
           this.log(`${sensors} Found ${sensors.length} sensors in telldus live.`);
 
 					return sensors.map(sensor => createDevice(sensor)).filter(sensor => sensor);
