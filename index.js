@@ -201,7 +201,7 @@ module.exports = function(homebridge) {
 			accessoryInformation
 				.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
 				.setCharacteristic(Characteristic.Model, this.model)
-				.setCharacteristic(Characteristic.SerialNumber, this.id);
+				.setCharacteristic(Characteristic.SerialNumber, this.id + "");
 
 			const modelDefinition = modelDefinitions.find(d => d.model === this.model);
 
