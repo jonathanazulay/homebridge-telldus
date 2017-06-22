@@ -124,9 +124,11 @@ module.exports = function(homebridge) {
 
 			TelldusLive.loginAsync.apply(TelldusLive, this.loginCredentials)
 				.then(user => {
+					this.log('logged in!')
 					this.log("Logged in with user: " + user);
 					return this.getAccessories();
 				})
+				.catch(() => this.log('login failed'))
 				.then(accessories => {
 					callback(accessories);
 				})
