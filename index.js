@@ -70,6 +70,8 @@ module.exports = function(homebridge) {
 			let session = new TelldusLocal.Session(config.url)
 			let interactiveLogin = login(session, 'homebridge-telldus', this.log);
 			TelldusLive = Object.assign(TelldusLocal.api(session), { login: interactiveLogin })
+			TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
+			bluebird.promisifyAll(TelldusLive);
 		} else {
 			this.log('Using TelldusLive')
 			const publicKey = config["public_key"];
