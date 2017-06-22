@@ -198,12 +198,12 @@ module.exports = function(homebridge) {
 			// Accessory information
 			const accessoryInformation = new Service.AccessoryInformation();
 
-			this.log(this)
+			this.log('getserives', this)
 
 			accessoryInformation
 				.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
 				.setCharacteristic(Characteristic.Model, this.model)
-				.setCharacteristic(Characteristic.SerialNumber, this.id);
+				.setCharacteristic(Characteristic.SerialNumber, this.id + "");
 
 			const modelDefinition = modelDefinitions.find(d => d.model === this.model);
 
