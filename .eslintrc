@@ -1,7 +1,7 @@
 {
     "extends": "eslint:recommended",
     "env": {
-      "es7": true,
+      "es6": true,
       "node": true,
     }
 }

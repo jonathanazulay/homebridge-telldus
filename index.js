@@ -6,7 +6,7 @@ const bluebird = require('bluebird');
 const debug = require('debug')('homebridge-telldus');
 
 const util = require('./util');
-
+const login = require('./login')
 
 module.exports = function(homebridge) {
 	const Service = homebridge.hap.Service;
@@ -66,35 +66,9 @@ module.exports = function(homebridge) {
 
 		if (config.url) {
 			this.log('Using local REST API at', config.url)
-
 			let session = new TelldusLocal.Session(config.url)
-
-			let login = function () {
-				return session
-					.initLogin('telldus-local-test')
-					.then(resp => {
-						this.log(`Visit ${resp.authUrl} within 60 seconds and authorize the app. 1 year renewable token is recommended`);
-						return resp.token
-					})
-					.then((token) =>
-						util.retryPromise(60, 1000)(() => session.resumeLogin(token))
-					)
-					.then(resp => {
-						this.log(`Your access token is: \n\n${resp.token}\n\nSave to config to avoid this step next time`);
-						return resp
-					})
-			}
-
-
-
-			async function login () {
-
-			}
-
-
-
-
-			TelldusLive = Object.assign(TelldusLocal.api(session), { login })
+			let interactiveLogin = login(session, 'homebridge-telldus', this.log);
+			TelldusLive = Object.assign(TelldusLocal.api(session), { login: interactiveLogin })
 		} else {
 			this.log('Using TelldusLive')
 			const publicKey = config["public_key"];
