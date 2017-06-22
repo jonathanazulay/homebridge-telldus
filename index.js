@@ -190,7 +190,7 @@ module.exports = function(homebridge) {
 		// Respond to identify request
 		identify: function(callback) {
 			this.log("Hi!");
-			callback();
+			callback(false);
 		},
 
 		getServices: function() {
@@ -247,7 +247,7 @@ module.exports = function(homebridge) {
 
 					cx.on('set', (state, callback) => {
 						TelldusLive.dimDeviceAsync(this.device, state)
-						.then(() => callback())
+						.then(() => callback(false))
 						.catch((err) => {
 							callback(err);
 						});
@@ -274,7 +274,7 @@ module.exports = function(homebridge) {
 
 					cx.on('set', (state, callback) => {
 						TelldusLive.dimDevice(this.device, state)
-						.then(() => callback())
+						.then(() => callback(false))
 						.catch((err) => {
 							callback(err);
 						})
@@ -366,9 +366,9 @@ module.exports = function(homebridge) {
 							// Don't turn on if already on for dimmer (prevents problems when dimming)
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
-							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
+							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback(false);
 							TelldusLive.onOffDeviceAsync(this.device, powerOn)
-							.then(() => callback())
+							.then(() => callback(false))
 							.catch((err) => callback(err))
 						})
 						.catch((err) => {
@@ -398,7 +398,7 @@ module.exports = function(homebridge) {
 					cx.on('set', (level, callback) => {
 						TelldusLive.dimDeviceAsync(this.device, util.percentageToBits(level))
 							.then(() => bluebird.delay(1000)) // Try to prevent massive queuing of commands on the server
-							.then(() => callback(), err => callback(err));
+							.then(() => callback(false), err => callback(err));
 					});
 				}
 
