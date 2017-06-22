@@ -142,6 +142,7 @@ module.exports = function(homebridge) {
 		},
 		getAccessories: function() {
 			const createDevice = (device) => {
+				this.log(device)
 				const deviceConfig = this.unknownAccessories.find(a => a.id == device.id);
 
 				if ((deviceConfig && deviceConfig.disabled)) {
@@ -165,7 +166,6 @@ module.exports = function(homebridge) {
 					return sensors.map(sensor => createDevice(sensor)).filter(sensor => sensor);
         })
 				.then(sensors => {
-					this.log('got sensors', sensors)
 					return TelldusLive.getDevicesAsync()
 						.then(devices => {
 							debug('getDevices response', devices);
