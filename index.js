@@ -70,6 +70,7 @@ module.exports = function(homebridge) {
 			let session = new TelldusLocal.Session(config.url)
 			let interactiveLogin = () => login(session, 'homebridge-telldus', this.log);
 			TelldusLive = Object.assign(TelldusLocal.api(session), { login: interactiveLogin })
+			this.loginCredentials = []
 		} else {
 			this.log('Using TelldusLive')
 			const publicKey = config["public_key"];
@@ -123,7 +124,7 @@ module.exports = function(homebridge) {
 
 			TelldusLive.loginAsync.apply(TelldusLive, this.loginCredentials)
 				.then(user => {
-					this.log("Logged in with user: " + user.email);
+					this.log("Logged in with user: " + user);
 					return this.getAccessories();
 				})
 				.then(accessories => {
