@@ -130,7 +130,7 @@ module.exports = function(homebridge) {
 			TelldusLive.loginAsync.apply(TelldusLive, this.loginCredentials)
 				.then(user => {
 					this.log("Logged in with user: " + user);
-					return this.getAccessories().map(a => a.device);
+					return this.getAccessories();
 				})
 				.then(accessories => {
 					this.log('done get accessories', accessories);
