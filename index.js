@@ -369,15 +369,9 @@ module.exports = function(homebridge) {
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback(false);
 							this.log(this.device, typeof powerOn)
 
-							if (powerOn) {
-								TelldusLive.turnOnDevice(this.device)
-								.then(() => { this.log('onoffsuccess'); callback(false); })
-								.catch((err) => { this.log('onofffail'); callback(err); })
-							} else {
-								TelldusLive.turnOffDevice(this.device)
-								.then(() => { this.log('onoffsuccess'); callback(false); })
-								.catch((err) => { this.log('onofffail'); callback(err); })
-							}
+							TelldusLive.onOffDevice(this.device, powerOn)
+							.then(() => { this.log('onoffsuccess'); callback(false); })
+							.catch((err) => { this.log('onofffail'); callback(err); })
 						})
 						.catch((err) => {
 							callback(err);
