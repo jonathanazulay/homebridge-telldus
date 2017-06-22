@@ -365,9 +365,12 @@ module.exports = function(homebridge) {
 							// Because homekit sends both Brightness command and On command at the same time.
 							const isDimmer = characteristics.indexOf(Characteristic.Brightness) > -1;
 							if (powerOn && isDimmer && cx.getValueFromDev(cdevice)) return callback();
-							console.log(powerOn)
+							this.log('powerOn', powerOn);
 							TelldusLive.turnOffDevice(this.device)
-							.catch((err) => callback(err))
+							.catch((err) => {
+								this.log('error', err);
+								callback(err);
+							})
 						})
 						.catch((err) => {
 							callback(err);
