@@ -70,18 +70,17 @@ module.exports = function(homebridge) {
 			let session = new TelldusLocal.Session(config.url)
 			let interactiveLogin = login(session, 'homebridge-telldus', this.log);
 			TelldusLive = Object.assign(TelldusLocal.api(session), { login: interactiveLogin })
-			TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
-			bluebird.promisifyAll(TelldusLive);
 		} else {
 			this.log('Using TelldusLive')
 			const publicKey = config["public_key"];
 			const privateKey = config["private_key"];
 			this.loginCredentials = [config.token, config.token_secret]
-			this.unknownAccessories = config["unknown_accessories"] || [];
-
 			TelldusLive = new TellduAPI.TelldusAPI({ publicKey, privateKey });
-			bluebird.promisifyAll(TelldusLive);
 		}
+
+		bluebird.promisifyAll(TelldusLive);
+		log(TelldusLive);
+		this.unknownAccessories = config["unknown_accessories"] || [];
 	}
 
 	function TelldusDevice(log, device, deviceConfig) {
