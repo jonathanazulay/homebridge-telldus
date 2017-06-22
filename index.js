@@ -133,6 +133,7 @@ module.exports = function(homebridge) {
 					return this.getAccessories();
 				})
 				.then(accessories => {
+					console.log('done get accessories', accessories);
 					callback(accessories);
 				})
 				.catch(err => {
