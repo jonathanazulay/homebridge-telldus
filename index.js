@@ -69,7 +69,7 @@ module.exports = function(homebridge) {
 			let session = new TelldusLocal.Session(config.url);
 			let interactiveLogin = () => login(session, 'homebridge-telldus', this.log);
 			TelldusLive = TelldusLocal.api(session);
-			Object.keys(TelldusLive).forEach(name => {
+			Object.getOwnPropertyNames(TelldusLive).forEach(name => {
 				TelldusLive[name + 'Async'] = TelldusLive[name]
 				delete TelldusLive[name]
 			});
