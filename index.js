@@ -68,7 +68,7 @@ module.exports = function(homebridge) {
 		if (config.url) {
 			this.log('Using local REST API at', config.url)
 			let session = new TelldusLocal.Session(config.url)
-			let interactiveLogin = () => login(session, 'homebridge-telldus', this.log);
+			let interactiveLogin = () => login(session, 'homebridge-telldus', this.log).then(console.log);
 			TelldusLive = Object.assign(TelldusLocal.api(session), { login: interactiveLogin })
 			this.loginCredentials = []
 		} else {
